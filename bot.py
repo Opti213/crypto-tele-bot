@@ -59,7 +59,7 @@ def send_message(message):
     try:
         command, address = message.text.split()
     except ValueError:
-        bot.send_message(message.chat.id, 'wrong enter, please try again or send  me "/help" for commandlisn')
+        bot.send_message(message.chat.id, 'wrong enter, please try again or send  me "/help" for commandList')
         return
 
     if command.lower() == 'wallet':

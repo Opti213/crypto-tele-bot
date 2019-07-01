@@ -1,11 +1,9 @@
 import telebot
 import requests
 import psycopg2
-import datetime
 import hmac
 
 # db connection
-date = datetime.datetime.now()
 conn = psycopg2.connect(dbname='postgres', user='postgres', password='4556', host='localhost')
 cursor = conn.cursor()
 # For working with bd on server should be table logs( id SERIAL PRIMARY KEY,
@@ -19,20 +17,27 @@ cursor = conn.cursor()
 bot = telebot.TeleBot('880750397:AAEJs4lqzwjjyuTR1RUVVMdjkVQXwCZpO98')
 
 
+# todo status code checker and cash for balance and trades operation
 def is_bitcoin(address: str) -> bool:
     response = requests.get('https://blockchain.info/q/addressbalance/{}'.format(address))
-    return str.isnumeric(response.text)
+    if response.status_code == 200:
+        return str.isnumeric(response.text)
+    else:
+        return False
 
 
 def is_ethereum(address: str) -> bool:
     response = requests.get(
         'https://api.etherscan.io/api?module=account&action=balance&address={}&tag=latest&apikey=0x15f8e5ea1079d9a0bb04a4c58ae5fe7654b5b2b4463375ff7ffb490aa0032f3a&apikey=0x4e9ce36e442e55ecd9025b9a6e0d88485d628a67'.format(
             address))
-    return response.json().get('message') == 'OK'
+    if response.status_code == 200:
+        return response.json().get('message') == 'OK'
+    else:
+        return False
 
 
 def make_log(request: str, response: str) -> None:
-    cursor.execute('''insert into logs (request, response, date) values (%s, %s, now());''', request, response)
+    cursor.execute('''insert into logs (request, response, date) values (%s, %s, now());''', (request, response))
     conn.commit()
 
 
@@ -52,12 +57,12 @@ def start_message(message):
 @bot.message_handler(content_types=['text'])
 def send_message(message):
     try:
-        command, address = message.text.lower().split()
+        command, address = message.text.split()
     except ValueError:
         bot.send_message(message.chat.id, 'wrong enter, please try again or send  me "/help" for commandlisn')
         return
 
-    if command == 'wallet':
+    if command.lower() == 'wallet':
         if is_bitcoin(address):
             bot.send_message(message.chat.id, 'btc')
         elif is_ethereum(address):
@@ -65,17 +70,23 @@ def send_message(message):
         else:
             bot.send_message(message.chat.id, 'wrong address')
 
-    elif message.text.lower().split()[0] == 'balance':
+    elif command.lower() == 'balance':
         if is_bitcoin(address):
             response = requests.get('https://blockchain.info/q/addressbalance/{}'.format(address))
-            make_log('bal {}'.format(address), response.text)
-            bot.send_message(message.chat.id, response.text)
+            if response.status_code == 200:
+                make_log('bal {}'.format(address), response.text)
+                bot.send_message(message.chat.id, response.text)
+            else:
+                bot.send_message(message.chat.id, "wrong response, code {}".format(response.status_code))
         elif is_ethereum(address):
             response = requests.get(
                 'https://api.etherscan.io/api?module=account&action=balance&address={}&tag=latest&apikey=0x15f8e5ea1079d9a0bb04a4c58ae5fe7654b5b2b4463375ff7ffb490aa0032f3a&apikey=0x4e9ce36e442e55ecd9025b9a6e0d88485d628a67'.format(
                     address))
-            make_log('bal {}'.format(address), response.json().get('result'))
-            bot.send_message(message.chat.id, response.json().get('result'))
+            if response.status_code == 200:
+                make_log('bal {}'.format(address), response.json().get('result'))
+                bot.send_message(message.chat.id, response.json().get('result'))
+            else:
+                bot.send_message(message.chat.id, "wrong response, code {}".format(response.status_code))
         else:
             bot.send_message(message.chat.id, "wrong address")  # todo something with withs cod-repeat
 

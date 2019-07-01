@@ -47,7 +47,7 @@ def start_message(message):
 
 
 @bot.message_handler(commands=['help'])
-def start_message(message):
+def help_message(message):
     bot.send_message(message.chat.id, 'command list:'
                                       '\nwallet <address> for check currency'
                                       '\nbalance <address> for check balance of wallet'
@@ -99,5 +99,9 @@ bot.polling()
 # 2. Возможность по адресу получать текущий баланс
 # 3. Возможность по адресу получать список транзакций
 
-# https://www.kraken.com/features/api#public-market-data
 # api for btc
+# https://www.kraken.com/features/api
+# https://www.blockchain.com/ru/api
+
+# api for eth
+# https://etherscan.io/apis

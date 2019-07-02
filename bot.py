@@ -13,6 +13,7 @@ import someconst
 # api for eth
 # https://etherscan.io/apis
 
+
 # db connection
 conn = psycopg2.connect(dbname=someconst.DBNAME, user=someconst.USER, password=someconst.PASSWORD, host=someconst.HOST)
 cursor = conn.cursor()
@@ -23,17 +24,16 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS logs (
                                                     response CHARACTER VARYING(100), 
                                                     status INTEGER,
                                                     date TIMESTAMP);''')
-# For working with bd on server should be table logs (
+# For work with bd on server must be table logs (
 #                                                     id SERIAL PRIMARY KEY,
 #                                                     command CHARACTER VARYING(50),
 #                                                     request CHARACTER VARYING(300),
 #                                                     response CHARACTER VARYING(100),
 #                                                     status INTEGER,
 #                                                     date TIMESTAMP);)
-# ex: insert cursor.execute('''insert into logs (request, response, date) values ('tmp', 'tmp', now());''')
+
 
 # bot connection
-# enter bot's token
 bot = telebot.TeleBot(someconst.BOT_TOKEN)
 
 
@@ -75,7 +75,7 @@ def make_log(command: str, request: str, status: int, response: str, ) -> None:
     cursor.execute('''insert into logs (command, request, status, response, date) values (%s, %s, %s, %s, now());''',
                    (command, request, status, response))
     conn.commit()
-    
+
 
 @bot.message_handler(commands=['help', 'start'])
 def help_message(message):

@@ -124,8 +124,8 @@ dmypy.json
 .pyre/
 
 # ide
-.idea
-/
+.idea/
+.vscode/
 
 # my own ignore
 tmp.py

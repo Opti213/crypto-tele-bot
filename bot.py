@@ -39,7 +39,7 @@ bot = telebot.TeleBot(someconst.BOT_TOKEN)
 
 def is_bitcoin(address: str) -> bool:
     response = requests.get('https://blockchain.info/q/addressbalance/{}'.format(address))
-    make_log('balance', 'https://blockchain.info/q/addressbalance/{}'.format(address), response.status_code,
+    make_log('currency', 'https://blockchain.info/q/addressbalance/{}'.format(address), response.status_code,
              response.text)
     if response.status_code == 200:
         return str.isnumeric(response.text)
